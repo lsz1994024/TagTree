@@ -19,9 +19,9 @@ from Utils.Funcs import divideInputList
 from Parameters import *
 #%% functions
 
-def getFeasiblePep(pcMass, allPeps, massRange):
-    lb = binarySearch(allPeps['pcMass'], 0, len(allPeps)-1, pcMass - massRange)
-    ub = binarySearch(allPeps['pcMass'], 0, len(allPeps)-1, pcMass + massRange)
+def getFeasiblePep(pcMass, allPeps, massTol):
+    lb = binarySearch(allPeps['pcMass'], 0, len(allPeps)-1, pcMass*(1 - massTol))
+    ub = binarySearch(allPeps['pcMass'], 0, len(allPeps)-1, pcMass*(1 + massTol))
     # print(lb, ub)
     return list(allPeps['seq'][lb : ub])
     
@@ -199,7 +199,7 @@ if __name__ == '__main__':
                              'numFesiPep' : [res[5] for res in result]
                              })#, orient='scanNo',columns=['Tags', 'Candidates'])
     # filePath = pd.ExcelWriter(r'TempData/dataVeri.xlsx')
-    dataVeri.to_excel(r'TempData/tag1p6_AA0p5_pcTOL1.0_mixFuzz80top20set_QeGA_bigDB_nTerm42p011_varOxiM15p99.xlsx')
+    dataVeri.to_excel(r'TempData/tag1p6_AA0p5_pcTOL0.1_mixFuzz80top20set_QeGA_bigDB_nTerm42p011_varOxiM15p99.xlsx')
     
     
     

@@ -63,9 +63,9 @@ if __name__ == '__main__':
     
     # print(simi('QIWLEJSBS', 'IQWLEJSBS'))
     
-    s1 = 'KPI'
+    s1 = 'AAE'
     
-    s2 = 'SKTSNKPIMIIHHIDECPHSQAIKK'
+    s2 = 'ALAEEAAKKGR'
     print(simi(s1,s2))
     
     print(fuzz.partial_ratio(s1, s2))
