@@ -1,0 +1,15 @@
+*.pyc
+/__pycache__
+/DataBase
+/Dataset
+/HashCluster/__pycache__
+/ReadHKPack/__pycache__
+/PreProcessPack/__pycache__
+/SasaPack/__pycache__
+/ProcessDbPack/__pycache__
+/ScorePack/__pycache__
+/Utils/__pycache__
+/ProcessSpecPack/__pycache__
+/Structure3DPack/__pycache__
+/VerifyStructurePack/__pycache__
+/TempData
