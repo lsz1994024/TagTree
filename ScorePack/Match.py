@@ -36,10 +36,10 @@ def cleanUpTags(reliableTags):
                 
 def simi(str1, str2):
     if str1 in str2 or str1[::-1] in str2:
-        # print(min((len(str2) - len(str1)), 15)/2)
         return 100 - min((len(str2) - len(str1)), 15)/2
-    return max(fuzz.partial_ratio(str1, str2) , 
-               fuzz.partial_ratio(str1[::-1], str2))+ len(str1)/len(str2)*2
+    return (  max(fuzz.partial_ratio(str1, str2), fuzz.partial_ratio(str1[::-1], str2))
+            + len(str1)/len(str2)*2
+            - len(str1)/len(lcs(str1, str2))*3)
 
 
 def getPepCand(reliableTags, feasiblePeps):

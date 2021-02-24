@@ -4,6 +4,8 @@ Created on Tue Nov 17 20:03:35 2020
 
 @author: slaiad
 """
+
+#%% import
 from ProcessDbPack.ParsePep import getAllProts, getAllPepsForParallel
 from ProcessSpecPack.ParseMsms import readPeaksFromXML, readTagsFromMS2
 from ProcessSpecPack.PreProcess import deIsotope
@@ -140,7 +142,6 @@ def parseDB(protList):
 
     allPeps = np.unique(allPeps)        
     allPeps = (np.sort(allPeps, order = ['pcMass']))
-    print("Number of all peps = ", len(allPeps))
     
     return allPeps
 
@@ -162,6 +163,7 @@ if __name__ == '__main__':
     specDict = readPeaksFromXML(SPEC_PATH)
     
     #%% doSearch
+    # runcell('import', '/home/slaiad/Code/TagTree/main.py')
     from Parameters import *
     print("start Searching")
     
@@ -179,8 +181,8 @@ if __name__ == '__main__':
     filePath = pd.ExcelWriter(r'TempData/dataPsms.xlsx')
     dataPsms.to_excel(r'TempData/dataPsms.xlsx')
     
-    #%% verification
-    dataMascot = pd.read_excel('/home/slaiad/Code/TagTree/testData/MK_SIO13_P2_GM10.1.xlsx')
+    #% verification
+    dataMascot = pd.read_excel('/home/slaiad/Code/TagTree/testData/MK_SIO13_P2_GM1.xlsx')
     
     masDict = {}
     # cometModDict = {}
@@ -253,7 +255,7 @@ if __name__ == '__main__':
                              'firstRight' : [res[6] for res in result]
                              })#, orient='scanNo',columns=['Tags', 'Candidates'])
     # filePath = pd.ExcelWriter(r'TempData/dataVeri.xlsx')
-    dataVeri.to_excel(r'TempData/tag1.4_AA0.5_pcTol10ppm_simiXreliabilityTop10_QeGA_nTerm42p011_varOxiM15p99_tagClustered.xlsx')
+    dataVeri.to_excel(r'TempData/tag1.6_AA0.5_pcTol10ppm_simiXreliabilityTop10LCS_QeGA_nTerm42p011_varOxiM15p99_tagClustered.xlsx')
     
     
     
