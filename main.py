@@ -12,7 +12,7 @@ from itertools import repeat
 import pandas as pd
 import numpy as np
 from Utils.Funcs import binarySearch
-from ScorePack.Match import getPepCand
+from ScorePack.Match import getPepCand, cleanUpTags
 from Utils.Funcs import divideInputList
 
 #%% Set Parameters
@@ -56,18 +56,37 @@ def searchSome(scanNoList):
             if tag[1] < TAG_SCORE_THRES:
                 break
             
-            reliableTags.append(tag[0])
+            reliableTags.append(tuple(tag[0:2]))
                 
             if len(reliableTags) == MAX_TAGS_NUM:
                 break
             
         if len(reliableTags) == 0:
             continue
-        # print('finish reliableTags', scanNo)
         
-        reliableTags = list(set(reliableTags))
+        # print('reTags', reliableTags)
+        # print(reliableTags)
+        # print(len(reliableTags), reliableTags[len(reliableTags)])
+        cleanUpTags(reliableTags)
+        # print(reliableTags)
+        # tagDict = {}
+        # tagKeys = list(set([tag[0] for tag in reliableTags]))
+        # for tag in tagKeys:
+        #     tagDict[tag] = [0, 0]
+        
+        # for tag in reliableTags:
+        #     tagDict[tag[0]][0] += tag[1]
+        #     tagDict[tag[0]][1] += 1
+        
+        # reliableTagsList = []
+        # for tag in tagDict:
+        #     reliableTagsList.append([tag, tagDict[tag][0]/tagDict[tag][1]])
+            
+        # print(reliableTagsList)
+        # reliableTags = list(set(reliableTags)) #todo   dont set it 
         
         feasiblePeps = getFeasiblePep(pcMass, allPeps, MASS_TOL)
+        # print('TALLDAAGVASLLTTAEVVVTEIPKEEKDPGMGAMGGMGGGMGGGMF' in feasiblePeps)
         # print(scanNo, pcMass)
         # print('reliable tags')
         # print(reliableTags)
@@ -89,7 +108,7 @@ def doSearch(specDict, allPeps):
     
     scanNoList = [key for key in specDict]
     
-    # scanNoList = [26477] #test
+    # scanNoList = [3116] #test
     
     dividedScanList = divideInputList(scanNoList, 2000)
     
@@ -160,35 +179,69 @@ if __name__ == '__main__':
     filePath = pd.ExcelWriter(r'TempData/dataPsms.xlsx')
     dataPsms.to_excel(r'TempData/dataPsms.xlsx')
     
-    #% verification
-    dataMascot = pd.read_excel('/home/slaiad/Code/TagTree/testData/MK_SIO13_P2_GM1.xlsx')
+    #%% verification
+    dataMascot = pd.read_excel('/home/slaiad/Code/TagTree/testData/MK_SIO13_P2_GM10.1.xlsx')
     
     masDict = {}
     # cometModDict = {}
     for i in range(len(dataMascot['scanNo'])):
+        scanNo = dataMascot['scanNo'][i]
         pep = dataMascot['pep'][i]
-        masDict[dataMascot['scanNo'][i]] = pep
+        if scanNo in masDict:
+            masDict[scanNo].append(pep)
+        else:
+            masDict[scanNo] = []     
+            masDict[scanNo].append(pep)
         
     result = []
     numSameMascot = 0
-    numDiffMascot = 0
+    numWrong      = 0
     numNoInMasCot = 0
+    numFirstRight = 0
+    numTwoRight   = 0
     for psm in allPsms:
-        pepCand = psm[2]
         scanNo = psm[0]
-        if scanNo in masDict:
-            pep = masDict[scanNo].replace("L", "I")
-            if pep.upper() in [cand.upper() for cand in pepCand]:
-                numSameMascot += 1
-            else:
-                numDiffMascot += 1
-                # print(scanNo, masDict[scanNo], pepCand)
-            result.append([scanNo, pepCand, psm[1], masDict[scanNo], pep.upper() in [cand.upper() for cand in pepCand], psm[3]])
-        else:
+        tags = psm[1]
+        pepCand = psm[2]
+        lenFeasPeps = psm[3]
+        
+        if scanNo not in masDict:
             numNoInMasCot += 1
-    print('total number of res same as Mascot', numSameMascot)
-    print('total number of res diff from Mascot', numDiffMascot)
-    print('total number of res not in Mascot', numNoInMasCot)
+            result.append([scanNo, pepCand, tags, [], 'notMas', lenFeasPeps, 'notMas'])
+            continue
+        
+        pepsTrue = [p.replace("L", "I") for p in masDict[scanNo]]
+        
+        if len(pepCand) == 0:
+            numWrong += 1
+            result.append([scanNo, pepCand, tags, pepsTrue, False, lenFeasPeps, False])
+            continue
+        
+        
+        pepsTrueUpper = [p.upper() for p in pepsTrue]
+        pepCandUpper = [cand.upper() for cand in pepCand]
+        
+        
+        if set(pepsTrueUpper) & set(pepCandUpper) != set():
+            numSameMascot += len(set(pepsTrueUpper) & set(pepCandUpper))
+            
+            result.append([scanNo, pepCand, tags, pepsTrue, True, lenFeasPeps, pepCandUpper[0] in pepsTrueUpper])
+            if pepCandUpper[0] in pepsTrueUpper:
+                numFirstRight += 1
+            
+            if (len(pepCandUpper) >= 2) and (pepCandUpper[0] in pepsTrueUpper or pepCandUpper[1] in pepsTrueUpper):
+                numTwoRight += 1
+                
+        else:
+            numWrong += 1
+            result.append([scanNo, pepCand, tags, pepsTrue, False, lenFeasPeps, False])
+            
+    print('First Right', numFirstRight)
+    print('Two right', numTwoRight)
+    print('Contains right', numSameMascot)
+    print('Wrong', numWrong)
+    print('Not in Mascot', numNoInMasCot)
+    print('mascot', len(dataMascot['scanNo']))
     
     #%
     dataVeri = pd.DataFrame({'scanNo'     : [res[0] for res in result],
@@ -196,10 +249,11 @@ if __name__ == '__main__':
                              'tags'       : [res[2] for res in result],
                              'truth'      : [res[3] for res in result],
                              'inOrnot'    : [res[4] for res in result],
-                             'numFesiPep' : [res[5] for res in result]
+                             'numFesiPep' : [res[5] for res in result],
+                             'firstRight' : [res[6] for res in result]
                              })#, orient='scanNo',columns=['Tags', 'Candidates'])
     # filePath = pd.ExcelWriter(r'TempData/dataVeri.xlsx')
-    dataVeri.to_excel(r'TempData/tag1p6_AA0p5_pcTOL0.1_mixFuzz80top20set_QeGA_bigDB_nTerm42p011_varOxiM15p99.xlsx')
+    dataVeri.to_excel(r'TempData/tag1.4_AA0.5_pcTol10ppm_simiXreliabilityTop10_QeGA_nTerm42p011_varOxiM15p99_tagClustered.xlsx')
     
     
     
