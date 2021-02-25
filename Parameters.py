@@ -9,8 +9,13 @@ Created on Mon Feb  8 20:40:29 2021
 # DB_PATH = 'Database/fasta/uniprot_homo_sapiens.fasta'
 DB_PATH = 'Database/fasta/uniprot_homo_canonical_isoform.fasta'
 # uniprot_homo_canonical_isoform.fasta
-SPEC_PATH = 'Dataset/PXD022999/191122_MK_SIO13_P2-GM1.mzXML'
-# SPEC_PATH = 'Dataset/PXD022999/01650b_BD2-TUM_first_pool_54_01_01-2xIT_2xHCD-1h-R2.mzXML'
+
+# SPEC_PATH = 'Dataset/PXD022999/191122_MK_SIO13_P2-GM1.mzXML'
+# ANSWER_PATH = '/home/slaiad/Code/TagTree/testData/MK_SIO13_P2_GM1.xlsx'
+
+# SPEC_PATH = 'Dataset/PXD004732/01650b_BD2-TUM_first_pool_54_01_01-2xIT_2xHCD-1h-R2.mzXML'
+# ANSWER_PATH = '/home/slaiad/Code/TagTree/testData/004732Ans.xlsx'
+
 #%%
 MIN_LENGTH_OF_PEP = 6
 MAX_LENGTH_OF_PEP = 60
